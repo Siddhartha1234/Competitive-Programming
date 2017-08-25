@@ -52,24 +52,52 @@ const ll maxn = 2e5;
 /* solve here */
 void solve()
 {
-   ll n;
+   int n;
    cin>>n;
-   if(n==1){ cout<<1<<endl; return;}
-   vll a(n);
-   rep(i,0,n-1) cin>>a[i];
-   vll var;
-   var.pb(a[0]);
-   rep(i,0,var[0]) {
-       if(a[1] - i == 0) {
-           var[0] = i;
-           break;
-       }
+   if(n < 2) {
+     cout<<0<<endl;
+     return;
    }
-   var.pb(a[1]);
-   rep(i,2,n-1){
-        cout<<i<<endl;
+   string s;
+   rep(i,0,n-1) { 
+     int c; cin>>c;
+     s += c +'0';
    }
+   unordered_set<string> check;
+   ll ans = 0;
    
+   stack< string> st;
+   st.push(s);
+
+   while(!st.empty())
+   {
+      string curr = st.top();
+      st.pop();
+      if(!present(check,curr)) ans++, check.insert(curr);
+      else continue;
+      
+      ll leng = sz(curr);
+      if(leng < 2) continue;
+
+      if((curr[leng-1] - '0') && (curr[leng-2] - '0'))
+      {
+        string temp = curr;
+        temp[leng-1] -- , temp[leng-2]--, temp += '1';
+        st.push(temp);
+      }
+
+      rep(i,0,leng-3) {
+        if((curr[i] - '0') && (curr[i+1] - '0') )
+        {
+           string temp = curr;
+           temp[i]--,temp[i+1]--, temp[i+2]++;
+           st.push(temp);
+        } 
+      } 
+   }   
+   cout<<ans<<endl;
+   check.clear();
+   ans = 0;
 }
 /* main function */
 int main() 

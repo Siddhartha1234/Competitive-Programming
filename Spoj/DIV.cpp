@@ -69,6 +69,7 @@ void solve()
         curr = s[num];
         cnt = 1;
     }
+    }
     num = prod;
     ll divcnt = 0;
     curr = s[num];  

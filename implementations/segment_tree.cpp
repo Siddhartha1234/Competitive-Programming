@@ -1,61 +1,64 @@
-class RMQ {
-    vll M;
-    vll A;
-    ll N;
-    RMQ(ll arr[], ll arrsz)
-    {
-        A.resize(maxn);
-        rep(i,0,arrsz-1) A[i] = arr[i];
-        N = arrsz;
-        build(1,0,N-1);
-    }
-    RMQ(vll &arr)
-    {
-        M.resize(4*maxn);
-        A.resize(maxn);
-        A = arr;
-        N = A.size();
-        build(1,0,N-1);
-    }
-    void build(ll node, ll b, ll e)
-    {
-          if (b == e)
-              M[node] = b;
-          else
-           {
-              build(2 * node, b, (b + e) / 2, M, A, N);
-              build(2 * node + 1, (b + e) / 2 + 1, e, M, A, N);
-              if (A[M[2 * node]] <= A[M[2 * node + 1]])
-                  M[node] = M[2 * node];
-              else
-                  M[node] = M[2 * node + 1]; 
-          }
-    }
+int N; 
+int t[4*N];
+int lazy[4*N];
 
-    ll query(ll node, ll b, ll e, ll i, ll j)
-    {
-          int p1, p2;
-       
-          if (i > e || j < b)
-              return -1;
-       
-          if (b >= i && e <= j)
-              return M[node];
-       
-          p1 = query(2 * node, b, (b + e) / 2, M, A, i, j);
-          p2 = query(2 * node + 1, (b + e) / 2 + 1, e, M, A, i, j);
-       
-          if (p1 == -1)
-              return M[node] = p2;
-          if (p2 == -1)
-              return M[node] = p1;
-          if (A[p1] <= A[p2])
-              return M[node] = p1;
-          return M[node] = p2;
-    }
+ll merge(ll a,ll b, int flag){
+    if(flag) return a|b;
+    else return a ^ b;
+}
+void build(int node, int st, int end, int flag){
+  if(st==end){
+    t[node]=1ll << color[v[st]]; 
+    return;
+  }
+  else {
+    int mid = (st+end)>>1;
+    build(node<<1,st,mid);
+    build(node<<1|1,mid+1,end);
+    t[node]=merge(t[node<<1],t[node<<1]|1,!flag);
+  }
+}
 
-    ll getMin(ll l, ll r)
+void update(int node,int st, int end, int l, int r, int c){
+  if(lazy[node]){
+    t[node]=1ll<<lazy[node];
+    if(st!=end)
     {
-        return query(1,0,N-1,l,r);
+      lazy[node<<1]=lazy[node<<1|1]=lazy[node];
     }
-};
+    lazy[node]=0;
+  }
+  if(l>end or r <st or st >end){
+    return 0ll;
+  }
+  if(l<=st and r>=end){
+    t[node]=1ll << c;
+    if(st!=end)
+      lazy[node<<1]=lazy[node<<1|1]=c;
+    return;
+  }
+  int mid = (st+end)>>1;
+  update(node<<1,st,mid,l,r,c);
+  update(node<<1|1,mid+1,end,l,r,c);
+  t[node]=t[node<<1]|t[node<<1|1];
+}
+
+ll query(int node,int st,int end, int l ,int r){
+  if(lazy[node]!=0){
+    t[node]=1ll<<lazy[node];
+    if(st!=end)
+      lazy[node<<1]=lazy[node<<1|1] = lazy[node];
+    lazy[node]=0;
+  }
+  if(l>end or r <st or st>end){
+    return 0ll;
+  }
+  if(l<=st and r>=end){
+    return t[node];
+  }
+  int mid = (st+end)>>1;
+  ll q1 = query(node<<1,st,mid,l,r);
+  ll q2=query(node<<1|1,mid+1,end,l,r);
+  return merge(q1,q2);
+}
+
